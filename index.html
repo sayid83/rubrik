@@ -181,6 +181,10 @@
   .sah-btn.SB.active { background: #e8f9f2; border-color: var(--accent); color: var(--accent); }
   .sah-btn.B.active  { background: #e8f0fc; border-color: var(--primary); color: var(--primary); }
   .sah-btn.SD.active { background: #fef4e4; border-color: var(--warn); color: var(--warn); }
+  .bulk-sah-btn { font-size: 12px !important; padding: 6px 14px !important; }
+  .bulk-sah-btn.SB.active { background: #e8f9f2; border-color: var(--accent); color: var(--accent); font-weight:800; box-shadow: 0 0 0 2px var(--accent); }
+  .bulk-sah-btn.B.active  { background: #e8f0fc; border-color: var(--primary); color: var(--primary); font-weight:800; box-shadow: 0 0 0 2px var(--primary); }
+  .bulk-sah-btn.SD.active { background: #fef4e4; border-color: var(--warn); color: var(--warn); font-weight:800; box-shadow: 0 0 0 2px var(--warn); }
 
   td.status { width: 40px; text-align: center; }
   .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); display: inline-block; }
@@ -580,9 +584,9 @@ function renderKelasView() {
           <input type="number" id="bulk-jumlah" placeholder="—" min="0" style="width:60px">
         </div>
         <div style="display:flex;gap:6px">
-          <button class="sah-btn SB" onclick="bulkSahsiah('Sangat Baik')">Sangat Baik</button>
-          <button class="sah-btn B"  onclick="bulkSahsiah('Baik')">Baik</button>
-          <button class="sah-btn SD" onclick="bulkSahsiah('Sederhana')">Sederhana</button>
+          <button class="sah-btn bulk-sah-btn SB" onclick="bulkSahsiah('Sangat Baik')">Sangat Baik</button>
+          <button class="sah-btn bulk-sah-btn B"  onclick="bulkSahsiah('Baik')">Baik</button>
+          <button class="sah-btn bulk-sah-btn SD" onclick="bulkSahsiah('Sederhana')">Sederhana</button>
         </div>
         <button class="btn btn-secondary btn-sm" onclick="bulkFillAll()">Terapkan Semua</button>
       </div>
@@ -674,7 +678,14 @@ function updateDot(i, nama) {
 
 // ── Bulk Fill ──────────────────────────────────────────────
 let _bulkSahsiah = '';
-function bulkSahsiah(v) { _bulkSahsiah = v; }
+function bulkSahsiah(v) {
+  _bulkSahsiah = v;
+  // Highlight button yang dipilih
+  document.querySelectorAll('.bulk-sah-btn').forEach(b => b.classList.remove('active'));
+  const cls = v === 'Sangat Baik' ? 'SB' : v === 'Baik' ? 'B' : 'SD';
+  const btn = document.querySelector('.bulk-sah-btn.' + cls);
+  if (btn) btn.classList.add('active');
+}
 
 function bulkFillAll() {
   const hadir  = document.getElementById('bulk-hadir')?.value;
