@@ -363,22 +363,45 @@ let state = {
   loading  : false,
 };
 
-// ── GAS API ────────────────────────────────────────────────
-async function api(action, extra = {}) {
-  if (!state.gasUrl) { toast('Sila tetapkan GAS URL dahulu.','error'); openSettings(); return null; }
-  try {
-    let url = state.gasUrl + '?action=' + action;
+// ── GAS API (JSONP — tiada CORS issue) ────────────────────
+function api(action, extra = {}) {
+  return new Promise((resolve, reject) => {
+    if (!state.gasUrl) { toast('Sila tetapkan GAS URL dahulu.','error'); openSettings(); resolve(null); return; }
+
+    const cbName = '_cb_' + Date.now() + '_' + Math.floor(Math.random()*9999);
+    let url = state.gasUrl + '?action=' + encodeURIComponent(action) + '&callback=' + cbName;
     if (extra.kelas) url += '&kelas=' + encodeURIComponent(extra.kelas);
     if (extra.data)  url += '&data='  + encodeURIComponent(JSON.stringify(extra.data));
 
-    const res  = await fetch(url, { redirect: 'follow' });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.error || 'Ralat tidak diketahui');
-    return data;
-  } catch(e) {
-    toast('Ralat: ' + e.message, 'error');
-    return null;
-  }
+    const timer = setTimeout(() => {
+      cleanup();
+      toast('Ralat: Request timeout. Semak URL GAS.', 'error');
+      resolve(null);
+    }, 15000);
+
+    function cleanup() {
+      delete window[cbName];
+      const s = document.getElementById(cbName);
+      if (s) s.remove();
+      clearTimeout(timer);
+    }
+
+    window[cbName] = function(data) {
+      cleanup();
+      if (!data.success) { toast('Ralat: ' + (data.error || 'Tidak diketahui'), 'error'); resolve(null); return; }
+      resolve(data);
+    };
+
+    const script = document.createElement('script');
+    script.id  = cbName;
+    script.src = url;
+    script.onerror = function() {
+      cleanup();
+      toast('Ralat: Gagal sambung ke GAS. Semak URL.', 'error');
+      resolve(null);
+    };
+    document.head.appendChild(script);
+  });
 }
 
 // ── Init ───────────────────────────────────────────────────
