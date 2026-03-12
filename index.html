@@ -198,6 +198,13 @@
     margin-bottom: 14px; font-size: 13px; font-weight: 600; color: var(--primary);
   }
   .bulk-bar .bulk-fields { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .bulk-pill {
+    padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border);
+    font-family: inherit; font-size: 12px; font-weight: 600;
+    cursor: pointer; background: var(--surface); color: var(--sub);
+    transition: all .15s;
+  }
+  .bulk-pill:hover { border-color: var(--primary); color: var(--primary); }
 
   /* ── Empty / Loading ── */
   .state-box {
@@ -584,9 +591,9 @@ function renderKelasView() {
           <input type="number" id="bulk-jumlah" placeholder="—" min="0" style="width:60px">
         </div>
         <div style="display:flex;gap:6px">
-          <button class="sah-btn bulk-sah-btn SB" onclick="bulkSahsiah('Sangat Baik')">Sangat Baik</button>
-          <button class="sah-btn bulk-sah-btn B"  onclick="bulkSahsiah('Baik')">Baik</button>
-          <button class="sah-btn bulk-sah-btn SD" onclick="bulkSahsiah('Sederhana')">Sederhana</button>
+          <button id="bsb-SB" class="bulk-pill" onclick="bulkSahsiah('Sangat Baik','SB')">Sangat Baik</button>
+          <button id="bsb-B"  class="bulk-pill" onclick="bulkSahsiah('Baik','B')">Baik</button>
+          <button id="bsb-SD" class="bulk-pill" onclick="bulkSahsiah('Sederhana','SD')">Sederhana</button>
         </div>
         <button class="btn btn-secondary btn-sm" onclick="bulkFillAll()">Terapkan Semua</button>
       </div>
@@ -678,13 +685,28 @@ function updateDot(i, nama) {
 
 // ── Bulk Fill ──────────────────────────────────────────────
 let _bulkSahsiah = '';
-function bulkSahsiah(v) {
+function bulkSahsiah(v, cls) {
   _bulkSahsiah = v;
-  // Highlight button yang dipilih
-  document.querySelectorAll('.bulk-sah-btn').forEach(b => b.classList.remove('active'));
-  const cls = v === 'Sangat Baik' ? 'SB' : v === 'Baik' ? 'B' : 'SD';
-  const btn = document.querySelector('.bulk-sah-btn.' + cls);
-  if (btn) btn.classList.add('active');
+  ['SB','B','SD'].forEach(c => {
+    const b = document.getElementById('bsb-'+c);
+    if (b) {
+      b.style.background   = '';
+      b.style.borderColor  = '';
+      b.style.color        = '';
+      b.style.fontWeight   = '600';
+      b.style.boxShadow    = '';
+    }
+  });
+  const active = document.getElementById('bsb-'+cls);
+  if (active) {
+    const colors = { SB: ['#e8f9f2','#00b377','#00b377'], B: ['#e8f0fc','#1a5cad','#1a5cad'], SD: ['#fef4e4','#e8a020','#e8a020'] };
+    const [bg, border, color] = colors[cls];
+    active.style.background  = bg;
+    active.style.borderColor = border;
+    active.style.color       = color;
+    active.style.fontWeight  = '800';
+    active.style.boxShadow   = '0 0 0 2px ' + border;
+  }
 }
 
 function bulkFillAll() {
