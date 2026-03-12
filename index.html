@@ -367,11 +367,11 @@ let state = {
 async function api(action, extra = {}) {
   if (!state.gasUrl) { toast('Sila tetapkan GAS URL dahulu.','error'); openSettings(); return null; }
   try {
-    const res = await fetch(state.gasUrl, {
-      method : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body   : JSON.stringify({ action, ...extra }),
-    });
+    let url = state.gasUrl + '?action=' + action;
+    if (extra.kelas) url += '&kelas=' + encodeURIComponent(extra.kelas);
+    if (extra.data)  url += '&data='  + encodeURIComponent(JSON.stringify(extra.data));
+
+    const res  = await fetch(url, { redirect: 'follow' });
     const data = await res.json();
     if (!data.success) throw new Error(data.error || 'Ralat tidak diketahui');
     return data;
