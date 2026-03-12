@@ -106,10 +106,11 @@
   .dash-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--primary); }
   .dash-card h3 { font-size: 13px; font-weight: 700; margin-bottom: 10px; color: var(--sub); }
   .dash-card .progress-row { display: flex; align-items: center; gap: 8px; }
-  .progress-bar { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-  .progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width .4s; }
+  .progress-bar { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 4px; transition: width .6s ease; }
+  .progress-fill.full    { background: var(--accent); }
   .progress-fill.partial { background: var(--warn); }
-  .progress-fill.empty { background: var(--border); }
+  .progress-fill.empty   { background: var(--muted); }
   .dash-card .pct { font-size: 13px; font-weight: 700; color: var(--text); min-width: 36px; text-align: right; }
   .dash-card .counts { font-size: 11px; color: var(--muted); margin-top: 6px; }
 
@@ -440,29 +441,49 @@ async function loadDashboard() {
 
 function renderDashboard(stats) {
   const main = document.getElementById('main');
+
+  const totalSemua = stats.reduce((a,s) => a + s.total, 0);
+  const siapSemua  = stats.reduce((a,s) => a + s.siap,  0);
+  const pctSemua   = totalSemua > 0 ? Math.round(siapSemua / totalSemua * 100) : 0;
+
   main.innerHTML = `
     <div class="section-hd">
       <div>
-        <h2>📊 Dashboard</h2>
+        <h2>&#128202; Dashboard</h2>
         <p>Semak status pengisian rubrik HBP bagi semua kelas.</p>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 20px;text-align:center">
+        <div style="font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px">Keseluruhan</div>
+        <div style="font-size:22px;font-weight:800;color:var(--primary);margin:2px 0">${pctSemua}%</div>
+        <div style="font-size:12px;color:var(--muted)">${siapSemua} / ${totalSemua} murid</div>
       </div>
     </div>
     <div class="dash-grid">
       ${stats.map(s => {
-        const cls = s.peratus===100?'':'partial';
-        return `<div class="dash-card" onclick="selectKelasFromDash('${s.kelas}')">
-          <h3>${s.kelas}</h3>
-          <div class="progress-row">
-            <div class="progress-bar"><div class="progress-fill ${cls}" style="width:${s.peratus}%"></div></div>
-            <div class="pct">${s.peratus}%</div>
-          </div>
-          <div class="counts">${s.siap} / ${s.total} murid siap</div>
-        </div>`;
+        const cls   = s.total === 0 ? 'empty' : s.peratus === 100 ? 'full' : 'partial';
+        const label = s.total === 0 ? 'Tiada data murid' : s.siap + ' / ' + s.total + ' murid siap';
+        return '<div class="dash-card" onclick="selectKelasFromDash(\'' + s.kelas + '\')">'
+          + '<h3>' + s.kelas + '</h3>'
+          + '<div class="progress-row">'
+          + '<div class="progress-bar"><div class="progress-fill ' + cls + '" id="pb-' + s.kelas.replace(' ','-') + '" style="width:0%"></div></div>'
+          + '<div class="pct">' + s.peratus + '%</div>'
+          + '</div>'
+          + '<div class="counts">' + label + '</div>'
+          + '</div>';
       }).join('')}
     </div>
   `;
-}
 
+  // Animate bars selepas render
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      stats.forEach(s => {
+        const bar = document.getElementById('pb-' + s.kelas.replace(' ','-'));
+        if (bar) bar.style.width = s.peratus + '%';
+      });
+    });
+  });
+}
 function showDashboard(btn) {
   setActive(btn);
   state.kelas = null;
