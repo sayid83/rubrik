@@ -439,15 +439,26 @@ async function loadDashboard() {
   if (!data) return;
   state.dashboard = data.stats;
 
-  // update badges
+  // Update sidebar badges
   data.stats.forEach(s => {
-    const badge = document.getElementById('badge-' + s.kelas.replace(' ','-'));
+    const key   = s.kelas.replace(' ','-');
+    const badge = document.getElementById('badge-' + key);
     if (!badge) return;
-    badge.textContent = s.total > 0 ? `${s.siap}/${s.total}` : '—';
-    badge.className = 'badge ' + (s.peratus === 100 ? '' : s.peratus > 0 ? 'warn' : 'muted');
+    badge.textContent = s.total > 0 ? s.siap + '/' + s.total : '—';
+    badge.className   = 'badge ' + (s.peratus === 100 ? '' : s.peratus > 0 ? 'warn' : 'muted');
   });
 
-  if (!state.kelas) renderDashboard(data.stats);
+  if (!state.kelas) {
+    renderDashboard(data.stats);
+  } else {
+    // Kalau tengah dalam kelas view, update progress bar dashboard secara background
+    // dan tunjuk badge kelas semasa
+    const cur = data.stats.find(s => s.kelas === state.kelas);
+    if (cur) {
+      const subtext = document.querySelector('.section-hd p');
+      if (subtext) subtext.textContent = cur.total + ' murid | ' + cur.siap + '/' + cur.total + ' siap (' + cur.peratus + '%)';
+    }
+  }
 }
 
 function renderDashboard(stats) {
