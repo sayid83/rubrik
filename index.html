@@ -560,6 +560,7 @@ function renderKelasView() {
       </div>
       <div style="display:flex;gap:8px">
         <button class="btn btn-secondary" onclick="openPrint()">🖨️ Pratonton Cetak</button>
+        <button class="btn" style="background:#fff0f0;color:var(--danger);border:1.5px solid #f5c0c0;" onclick="confirmReset()">🗑️ Reset Kelas</button>
         <button class="btn btn-success" id="save-btn" onclick="saveData()">💾 Simpan</button>
       </div>
     </div>
@@ -727,6 +728,21 @@ function bulkFillAll() {
 }
 
 // ── Save ───────────────────────────────────────────────────
+function confirmReset() {
+  if (!confirm('Reset semua data rubrik untuk ' + state.kelas + '?\nTindakan ini tidak boleh dibatalkan.')) return;
+  resetKelas();
+}
+
+function resetKelas() {
+  state.murid.forEach(m => {
+    state.edits[m.nama] = { hadirHari: '', jumlahHari: '', sahsiah: '' };
+  });
+  // Re-render table
+  document.getElementById('murid-tbody').innerHTML =
+    state.murid.map((m, i) => renderRow(m, i)).join('');
+  toast('Data kelas ' + state.kelas + ' telah direset.', 'success');
+}
+
 async function saveData() {
   const btn = document.getElementById('save-btn');
   btn.disabled = true; btn.textContent = '⏳ Menyimpan...';
