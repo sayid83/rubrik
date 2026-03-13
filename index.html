@@ -303,7 +303,7 @@
   </div>
   <div class="topbar-actions">
     <button class="btn-icon" onclick="openSettings()">⚙️ Tetapan GAS</button>
-    <button class="btn-icon" onclick="loadDashboard()">🔄 Muat Semula</button>
+    <button class="btn-icon" onclick="muatSemula()">🔄 Muat Semula</button>
   </div>
 </div>
 
@@ -506,6 +506,17 @@ function renderDashboard(stats) {
     });
   });
 }
+function muatSemula() {
+  if (state.kelas) {
+    // Reload kelas view semasa
+    const btn = [...document.querySelectorAll('.kelas-btn')].find(b => b.dataset.kelas === state.kelas);
+    if (btn) selectKelas(btn, state.kelas);
+  } else {
+    loadDashboard();
+  }
+  toast('Data telah dimuat semula.', 'success');
+}
+
 function showDashboard(btn) {
   setActive(btn);
   state.kelas = null;
