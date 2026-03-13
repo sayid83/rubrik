@@ -68,27 +68,85 @@
   /* ── Sidebar ── */
   .sidebar {
     width: 220px; flex-shrink: 0;
-    background: var(--surface); border-right: 1px solid var(--border);
+    background: linear-gradient(160deg, #0d1f4a 0%, #091733 45%, #050e22 100%);
+    border-right: none;
     padding: 20px 12px; display: flex; flex-direction: column; gap: 4px;
+    position: relative; overflow: hidden;
   }
-  .sidebar-label { font-size: 10px; font-weight: 700; color: var(--muted);
-    letter-spacing: 1px; padding: 8px 10px 4px; text-transform: uppercase; }
+
+  /* Top gloss highlight */
+  .sidebar::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 45%;
+    background: linear-gradient(180deg,
+      rgba(255,255,255,.13) 0%,
+      rgba(255,255,255,.04) 60%,
+      transparent 100%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* Bottom reflection shimmer */
+  .sidebar::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 30%;
+    background: linear-gradient(0deg,
+      rgba(255,255,255,.07) 0%,
+      transparent 100%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .sidebar > * { position: relative; z-index: 1; }
+
+  .sidebar-label {
+    font-size: 10px; font-weight: 700; color: rgba(255,255,255,.5);
+    letter-spacing: 1.2px; padding: 8px 10px 4px; text-transform: uppercase;
+  }
+
   .kelas-btn {
     width: 100%; text-align: left; padding: 9px 14px;
-    border: none; background: none; border-radius: 8px;
+    border: none; border-radius: 10px;
     font-family: inherit; font-size: 13px; font-weight: 500;
-    color: var(--sub); cursor: pointer; transition: all .15s;
+    color: rgba(255,255,255,.75); cursor: pointer;
+    transition: all .2s ease;
     display: flex; align-items: center; justify-content: space-between;
+    background: transparent;
+    position: relative; overflow: hidden;
   }
-  .kelas-btn:hover { background: var(--bg); color: var(--text); }
-  .kelas-btn.active { background: #e8f0fc; color: var(--primary); font-weight: 700; }
+
+  /* Glossy hover shimmer */
+  .kelas-btn::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg,
+      rgba(255,255,255,.15) 0%,
+      rgba(255,255,255,.04) 50%,
+      transparent 100%);
+    opacity: 0; transition: opacity .2s; border-radius: 10px;
+  }
+  .kelas-btn:hover::before { opacity: 1; }
+  .kelas-btn:hover {
+    background: rgba(255,255,255,.1);
+    color: #fff;
+    transform: translateX(2px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 2px 8px rgba(0,0,0,.15);
+  }
+
+  .kelas-btn.active {
+    background: rgba(255,255,255,.18);
+    color: #fff; font-weight: 700;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.35),
+      inset 0 -1px 0 rgba(0,0,0,.1),
+      0 2px 12px rgba(0,0,0,.2);
+  }
+  .kelas-btn.active::before { opacity: 1; }
   .badge {
     font-size: 10px; font-weight: 700; padding: 2px 7px;
-    border-radius: 20px; background: var(--accent); color: #fff; min-width: 22px;
-    text-align: center;
+    border-radius: 20px; background: rgba(0,179,119,.85); color: #fff; min-width: 22px;
+    text-align: center; backdrop-filter: blur(4px);
   }
-  .badge.warn { background: var(--warn); }
-  .badge.muted { background: var(--border); color: var(--sub); }
+  .badge.warn { background: rgba(232,160,32,.9); }
+  .badge.muted { background: rgba(255,255,255,.18); color: rgba(255,255,255,.7); }
 
   /* ── Main ── */
   .main { flex: 1; padding: 28px; overflow-y: auto; }
@@ -367,11 +425,11 @@
     }
     .sidebar-label {
       display: block; padding: 18px 16px 8px;
-      font-size: 11px; font-weight: 800; color: var(--muted);
-      letter-spacing: 1px; text-transform: uppercase;
-      border-bottom: 1px solid var(--border); margin-bottom: 6px;
+      font-size: 10px; font-weight: 800; color: rgba(255,255,255,.5);
+      letter-spacing: 1.2px; text-transform: uppercase;
+      border-bottom: 1px solid rgba(255,255,255,.12); margin-bottom: 6px;
     }
-    .sidebar-label::before { content: '📋 RUBRIK HBP 2026\A'; white-space: pre; font-size: 13px; font-weight: 800; color: var(--primary); letter-spacing: 0; }
+    .sidebar-label::before { content: '📋 RUBRIK HBP 2026\A'; white-space: pre; font-size: 13px; font-weight: 800; color: #fff; letter-spacing: 0; }
     .kelas-btn { border-radius: 8px; }
     .badge { display: inline-block; }
     #nav-overlay {
