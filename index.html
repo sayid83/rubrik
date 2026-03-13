@@ -733,14 +733,30 @@ function confirmReset() {
   resetKelas();
 }
 
-function resetKelas() {
+async function resetKelas() {
+  // Clear local edits
   state.murid.forEach(m => {
     state.edits[m.nama] = { hadirHari: '', jumlahHari: '', sahsiah: '' };
   });
+
   // Re-render table
   document.getElementById('murid-tbody').innerHTML =
     state.murid.map((m, i) => renderRow(m, i)).join('');
-  toast('Data kelas ' + state.kelas + ' telah direset.', 'success');
+
+  // Save kosong ke Sheets supaya dashboard update
+  const payload = {
+    kelas    : state.kelas,
+    guruKelas: state.guruKelas,
+    tarikh   : state.tarikh,
+    murid    : state.murid.map(m => ({
+      nama: m.nama, hadirHari: '', jumlahHari: '', sahsiah: ''
+    })),
+  };
+  const res = await api('saveRubrik', { data: payload });
+  if (res) {
+    toast('Data kelas ' + state.kelas + ' telah direset.', 'success');
+    loadDashboard(); // update progress bar
+  }
 }
 
 async function saveData() {
