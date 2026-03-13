@@ -252,19 +252,22 @@
   #print-area {
     display: none;
     position: fixed; inset: 0; background: #555; z-index: 500;
-    overflow-y: auto; overflow-x: hidden; padding: 0;
+    overflow: hidden;
   }
-  #print-area.open { display: block; }
+  #print-area.open { display: flex; flex-direction: column; }
   .print-controls {
-    display: flex; gap: 10px; padding: 12px 20px; justify-content: center;
-    background: rgba(40,40,40,.97); position: sticky; top: 0; z-index: 10;
+    flex-shrink: 0;
+    display: flex; gap: 10px; padding: 10px 20px; justify-content: center;
+    background: rgba(30,30,30,.97);
+  }
+  #print-scaler-outer {
+    flex: 1; overflow-y: auto; overflow-x: hidden; padding: 20px 0 40px;
   }
   #print-scaler {
-    display: flex; flex-direction: column; align-items: center; padding: 20px 0 40px;
+    display: flex; flex-direction: column; align-items: center;
   }
   .page-wrapper {
-    width: 100%; display: flex; justify-content: center;
-    margin-bottom: 14px; overflow: hidden;
+    margin-bottom: 14px; overflow: hidden; flex-shrink: 0;
   }
 
   /* ── Actual Print ── */
@@ -404,7 +407,7 @@
     <button class="btn btn-primary" onclick="window.print()">🖨️ Cetak</button>
     <button class="btn btn-secondary" onclick="closePrint()">✕ Tutup</button>
   </div>
-  <div id="print-pages"></div>
+  <div id="print-scaler-outer"><div id="print-pages"></div></div>
 </div>
 
 <script>
@@ -910,20 +913,24 @@ function openPrint() {
   }).join('') + '</div>';
   area.classList.add('open');
 
-  // Scale pages to fit viewport width
+  // Scale pages to fit container width - no horizontal scroll
   requestAnimationFrame(() => {
-    const page = area.querySelector('.print-page');
-    if (!page) return;
-    const vw        = area.clientWidth - 40; // 20px each side
-    const pageW     = page.offsetWidth;      // 210mm in px
-    const scale     = Math.min(1, vw / pageW);
-    area.querySelectorAll('.page-wrapper').forEach(w => {
-      w.style.height = (page.offsetHeight * scale) + 'px';
-    });
+    const outer = document.getElementById('print-scaler-outer');
+    const page  = area.querySelector('.print-page');
+    if (!page || !outer) return;
+
+    const vw    = outer.clientWidth - 32;
+    const pageW = page.scrollWidth;
+    const scale = Math.min(1, vw / pageW);
+
     area.querySelectorAll('.print-page').forEach(p => {
-      p.style.transform      = 'scale(' + scale + ')';
-      p.style.transformOrigin = 'top left';
-      p.style.marginLeft     = ((vw - pageW * scale) / 2) + 'px';
+      p.style.transform       = 'scale(' + scale + ')';
+      p.style.transformOrigin = 'top center';
+      p.style.display         = 'block';
+    });
+    area.querySelectorAll('.page-wrapper').forEach(w => {
+      w.style.width  = vw + 'px';
+      w.style.height = (page.scrollHeight * scale) + 'px';
     });
   });
 }
