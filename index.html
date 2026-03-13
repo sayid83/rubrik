@@ -34,17 +34,48 @@
 
   /* ── Top Bar ── */
   .topbar {
-    background: var(--primary);
+    background: linear-gradient(90deg, #050e22 0%, #0d1f4a 60%, #0f2456 100%);
     color: #fff;
     padding: 0 28px;
     height: 56px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 2px 8px rgba(26,92,173,.3);
+    box-shadow: 0 2px 16px rgba(0,0,0,.4);
     position: sticky;
     top: 0;
     z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    position: relative; overflow: hidden;
+  }
+  @keyframes topbarFlash {
+    0%   { transform: translateX(-100%) skewX(-15deg); opacity: 0; }
+    10%  { opacity: 1; }
+    40%  { opacity: .7; }
+    50%  { transform: translateX(150%) skewX(-15deg); opacity: 0; }
+    100% { transform: translateX(150%) skewX(-15deg); opacity: 0; }
+  }
+  @keyframes sidebarFlash {
+    0%   { transform: translateY(-100%) skewY(-10deg); opacity: 0; }
+    10%  { opacity: 1; }
+    40%  { opacity: .6; }
+    55%  { transform: translateY(160%) skewY(-10deg); opacity: 0; }
+    100% { transform: translateY(160%) skewY(-10deg); opacity: 0; }
+  }
+
+  .topbar::after {
+    content: '';
+    position: absolute; top: 0; bottom: 0; left: 0;
+    width: 40%;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255,255,255,.04) 20%,
+      rgba(255,255,255,.18) 50%,
+      rgba(255,255,255,.04) 80%,
+      transparent 100%);
+    pointer-events: none;
+    animation: topbarFlash 4s ease-in-out infinite;
+    animation-delay: 1s;
   }
   .topbar-brand { display: flex; align-items: center; gap: 10px; }
   .topbar-brand .logo {
@@ -88,11 +119,17 @@
   /* Bottom reflection shimmer */
   .sidebar::after {
     content: '';
-    position: absolute; bottom: 0; left: 0; right: 0; height: 30%;
-    background: linear-gradient(0deg,
-      rgba(255,255,255,.07) 0%,
+    position: absolute; left: 0; right: 0; top: 0;
+    height: 50%;
+    background: linear-gradient(180deg,
+      transparent 0%,
+      rgba(255,255,255,.15) 40%,
+      rgba(255,255,255,.22) 50%,
+      rgba(255,255,255,.15) 60%,
       transparent 100%);
     pointer-events: none; z-index: 0;
+    animation: sidebarFlash 5s ease-in-out infinite;
+    animation-delay: 2.5s;
   }
 
   .sidebar > * { position: relative; z-index: 1; }
