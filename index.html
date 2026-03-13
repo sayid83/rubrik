@@ -140,6 +140,7 @@
   }
   input:focus, select:focus { border-color: var(--primary); }
   input[type="number"] { width: 70px; font-family: 'DM Mono', monospace; text-align: center; }
+  input, select, button { touch-action: manipulation; }
   .btn {
     padding: 8px 18px; border-radius: 8px; border: none;
     font-family: inherit; font-size: 13px; font-weight: 700;
@@ -262,6 +263,7 @@
   }
   #print-scaler-outer {
     flex: 1; overflow-y: auto; overflow-x: hidden; padding: 20px 0 40px;
+    -webkit-overflow-scrolling: touch;
   }
   #print-scaler {
     display: flex; flex-direction: column; align-items: center;
@@ -345,6 +347,95 @@
   .print-table td { width: 32%; }
   .print-tick { font-size: 22pt; }
 
+
+  /* ── Mobile Responsive ── */
+  @media (max-width: 768px) {
+    /* Layout - stack sidebar on top */
+    .layout { flex-direction: column; }
+
+    /* Sidebar - slide-in drawer */
+    .sidebar {
+      position: fixed; top: 0; left: -260px; width: 260px; height: 100vh;
+      z-index: 300; flex-direction: column; flex-wrap: nowrap;
+      padding: 0; gap: 0; border-right: 1px solid var(--border);
+      transition: left .28s cubic-bezier(.4,0,.2,1);
+      overflow-y: auto; box-shadow: none;
+    }
+    .sidebar.open {
+      left: 0;
+      box-shadow: 4px 0 24px rgba(0,0,0,.18);
+    }
+    .sidebar-label {
+      display: block; padding: 18px 16px 8px;
+      font-size: 11px; font-weight: 800; color: var(--muted);
+      letter-spacing: 1px; text-transform: uppercase;
+      border-bottom: 1px solid var(--border); margin-bottom: 6px;
+    }
+    .sidebar-label::before { content: '📋 RUBRIK HBP 2026\A'; white-space: pre; font-size: 13px; font-weight: 800; color: var(--primary); letter-spacing: 0; }
+    .kelas-btn { border-radius: 8px; }
+    .badge { display: inline-block; }
+    #nav-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.45); z-index: 299;
+    }
+    #nav-overlay.open { display: block; }
+    #nav-toggle { display: flex !important; }
+
+    /* Main */
+    .main { padding: 14px; min-height: unset; }
+
+    /* Topbar */
+    .topbar { padding: 0 14px; height: 50px; }
+    .topbar-brand h1 { font-size: 13px; }
+    .topbar-brand span { display: none; }
+    .btn-icon { padding: 5px 10px; font-size: 11px; }
+
+    /* Dashboard cards - 2 column */
+    .dash-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .dash-card { padding: 12px 14px; }
+    .dash-card h3 { font-size: 12px; }
+
+    /* Section header - stack */
+    .section-hd { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .section-hd > div:last-child { width: 100%; display: flex; gap: 6px; flex-wrap: wrap; }
+    .section-hd > div:last-child .btn { flex: 1; justify-content: center; font-size: 12px; padding: 8px 10px; }
+
+    /* Toolbar - stack */
+    .toolbar { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .toolbar-group { flex-direction: column; gap: 8px; width: 100%; }
+    .field-group { width: 100%; }
+    .field-group input { width: 100% !important; }
+
+    /* Bulk bar */
+    .bulk-bar { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .bulk-fields { flex-direction: column; gap: 8px; width: 100%; }
+    .bulk-fields > div { width: 100%; }
+    .bulk-pill { flex: 1; text-align: center; }
+    .bulk-fields > div:nth-child(2) { display: flex; }
+    .btn-sm { width: 100%; justify-content: center; padding: 9px; }
+
+    /* Table - horizontal scroll */
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { min-width: 560px; }
+    thead th { font-size: 10px; padding: 9px 10px; }
+    td { padding: 8px 10px; font-size: 12px; }
+    td.nama { font-size: 12px; min-width: 140px; }
+    .sahsiah-group { flex-direction: column; gap: 4px; }
+    .sah-btn { font-size: 11px; padding: 4px 8px; }
+    input[type="number"] { width: 56px; }
+
+    /* Modal */
+    .modal { width: 94vw; padding: 20px; }
+
+    /* Toast */
+    #toast { left: 12px; right: 12px; bottom: 12px; font-size: 12px; }
+  }
+
+  @media (max-width: 480px) {
+    .dash-grid { grid-template-columns: repeat(2, 1fr); }
+    .section-hd h2 { font-size: 15px; }
+    .topbar-brand h1 { font-size: 12px; }
+  }
 </style>
 </head>
 <body>
@@ -356,6 +447,7 @@
     <h1>Rubrik HBP 2026 <span>| Tahun 3</span></h1>
   </div>
   <div class="topbar-actions">
+    <button class="btn-icon" id="nav-toggle" onclick="toggleNav()" style="display:none">☰ Menu</button>
     <button class="btn-icon" onclick="openSettings()">⚙️ Tetapan GAS</button>
     <button class="btn-icon" onclick="muatSemula()">🔄 Muat Semula</button>
   </div>
@@ -370,6 +462,7 @@
     <button class="kelas-btn active" onclick="showDashboard(this)" data-kelas="">📊 Dashboard</button>
     <div id="kelas-list"></div>
   </aside>
+  <div id="nav-overlay" onclick="closeNav()"></div>
 
   <!-- Main -->
   <main class="main" id="main">
@@ -959,9 +1052,19 @@ function saveSettings() {
 }
 
 // ── Helpers ────────────────────────────────────────────────
+function toggleNav() {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('nav-overlay').classList.toggle('open');
+}
+function closeNav() {
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('nav-overlay').classList.remove('open');
+}
+
 function setActive(btn) {
   document.querySelectorAll('.kelas-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  closeNav(); // auto close drawer after selecting kelas
 }
 
 let _toastTimer;
